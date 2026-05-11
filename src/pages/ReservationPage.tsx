@@ -53,10 +53,6 @@ export function ReservationPage() {
         <p className="reservation__lead">
           연락처와 인원을 입력해 웨이팅을 요청합니다.
         </p>
-        <p className="reservation__note">
-          연번은 웨이팅에서 몇 번째 순서인지를 나타내는 번호입니다. 순번은
-          접수 후 매장에서 안내됩니다.
-        </p>
 
         <form className="reservation__form" onSubmit={handleSubmit} noValidate>
           <label className="reservation__field">

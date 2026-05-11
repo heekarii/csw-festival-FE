@@ -24,19 +24,9 @@
 }
 
 .reservation__lead {
-  margin: 0 0 0.75rem;
+  margin: 0 0 1.5rem;
   color: #475569;
   font-size: 0.95rem;
-}
-
-.reservation__note {
-  margin: 0 0 1.25rem;
-  padding: 0.75rem 0.85rem;
-  border-radius: 0.5rem;
-  background: #f1f5f9;
-  color: #64748b;
-  font-size: 0.8125rem;
-  line-height: 1.45;
 }
 
 .reservation__form {
