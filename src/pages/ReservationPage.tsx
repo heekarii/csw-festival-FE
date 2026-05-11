@@ -6,6 +6,7 @@ import "./ReservationPage.css";
 export function ReservationPage() {
   const [contact, setContact] = useState("");
   const [participantCount, setParticipantCount] = useState("");
+  const [sequenceNumber, setSequenceNumber] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<"idle" | "success" | "failure">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -17,6 +18,7 @@ export function ReservationPage() {
 
     const trimmed = contact.trim();
     const count = Number.parseInt(participantCount, 10);
+    const seq = Number.parseInt(sequenceNumber, 10);
 
     if (!trimmed) {
       setErrorMessage("연락처를 입력해 주세요.");
@@ -26,17 +28,23 @@ export function ReservationPage() {
       setErrorMessage("인원수는 1명 이상의 숫자로 입력해 주세요.");
       return;
     }
+    if (!Number.isFinite(seq) || seq < 1) {
+      setErrorMessage("연번은 1 이상의 숫자로 입력해 주세요.");
+      return;
+    }
 
     setSubmitting(true);
     try {
       const ok = await submitReservation({
         contact: trimmed,
         participantCount: count,
+        sequenceNumber: seq,
       });
       setResult(ok ? "success" : "failure");
       if (ok) {
         setContact("");
         setParticipantCount("");
+        setSequenceNumber("");
       }
     } catch {
       setResult("failure");
@@ -49,9 +57,9 @@ export function ReservationPage() {
   return (
     <main className="reservation">
       <div className="reservation__card">
-        <h1 className="reservation__title">축제 예약</h1>
+        <h1 className="reservation__title">현자카야 웨이팅</h1>
         <p className="reservation__lead">
-          연락처와 참석 인원을 입력한 뒤 예약을 요청합니다.
+          연락처, 인원, 연번을 입력한 뒤 웨이팅을 요청합니다.
         </p>
 
         <form className="reservation__form" onSubmit={handleSubmit} noValidate>
@@ -85,6 +93,21 @@ export function ReservationPage() {
             />
           </label>
 
+          <label className="reservation__field">
+            <span className="reservation__label">연번</span>
+            <input
+              type="number"
+              name="sequenceNumber"
+              min={1}
+              step={1}
+              placeholder="연번"
+              value={sequenceNumber}
+              onChange={(e) => setSequenceNumber(e.target.value)}
+              disabled={submitting}
+              required
+            />
+          </label>
+
           {errorMessage ? (
             <p className="reservation__hint reservation__hint--error" role="alert">
               {errorMessage}
@@ -93,13 +116,13 @@ export function ReservationPage() {
 
           {result === "success" ? (
             <p className="reservation__hint reservation__hint--success" role="status">
-              예약 요청이 접수되었습니다.
+              웨이팅 요청이 접수되었습니다.
             </p>
           ) : null}
 
           {result === "failure" && !errorMessage ? (
             <p className="reservation__hint reservation__hint--error" role="alert">
-              예약 처리에 실패했습니다. 입력 정보를 확인하거나 다시 시도해 주세요.
+              웨이팅 처리에 실패했습니다. 입력 정보를 확인하거나 다시 시도해 주세요.
             </p>
           ) : null}
 
@@ -108,7 +131,7 @@ export function ReservationPage() {
             className="reservation__submit"
             disabled={submitting}
           >
-            {submitting ? "전송 중…" : "예약 요청"}
+            {submitting ? "전송 중…" : "웨이팅 요청"}
           </button>
         </form>
       </div>
