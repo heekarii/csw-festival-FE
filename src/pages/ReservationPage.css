@@ -1,0 +1,103 @@
+.reservation {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: linear-gradient(160deg, #e0f2fe 0%, #f8fafc 45%, #fef3c7 100%);
+}
+
+.reservation__card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2rem;
+  border-radius: 1rem;
+  background: #ffffff;
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+}
+
+.reservation__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.reservation__lead {
+  margin: 0 0 1.5rem;
+  color: #475569;
+  font-size: 0.95rem;
+}
+
+.reservation__form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.reservation__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.reservation__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.reservation__field input {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.reservation__field input:focus {
+  outline: none;
+  border-color: #0284c7;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+}
+
+.reservation__field input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.reservation__hint {
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.reservation__hint--error {
+  color: #b91c1c;
+}
+
+.reservation__hint--success {
+  color: #047857;
+}
+
+.reservation__submit {
+  margin-top: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: #0284c7;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.reservation__submit:hover:not(:disabled) {
+  background: #0369a1;
+}
+
+.reservation__submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
