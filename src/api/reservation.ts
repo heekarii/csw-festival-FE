@@ -1,14 +1,12 @@
 /**
  * Waiting-list request body (TF / backend contract).
- * Adjust path via VITE_RESERVATION_PATH when the real endpoint is fixed.
+ * Queue position (연번) is assigned server-side; not sent by the client.
  */
 export type ReservationRequestBody = {
   /** Contact info (phone, email, or combined string from the form) */
   contact: string;
   /** Number of guests */
   participantCount: number;
-  /** Sequence number (연번); replaces former visit-time field in the contract */
-  sequenceNumber: number;
 };
 
 const DEFAULT_PATH = "/api/reservations";
