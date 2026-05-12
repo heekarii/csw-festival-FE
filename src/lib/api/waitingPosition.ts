@@ -27,9 +27,9 @@ function parseQueuePosition(data: unknown): QueuePositionResult {
   if (o.result === false) {
     return { ok: false, queueNumber: null };
   }
-  const n = o.queueNumber;
-  if (typeof n === "number" && Number.isFinite(n) && n >= 1) {
-    return { ok: true, queueNumber: Math.floor(n) };
+  const raw = o.queueNumber ?? o.waitingNumber;
+  if (typeof raw === "number" && Number.isFinite(raw) && raw >= 1) {
+    return { ok: true, queueNumber: Math.floor(raw) };
   }
   return { ok: false, queueNumber: null };
 }

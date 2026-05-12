@@ -46,10 +46,16 @@ function parseWaitingSuccess(data: unknown): boolean {
 export async function submitWaiting(
   body: WaitingRequestBody,
 ): Promise<boolean> {
+  const payload = {
+    phone: body.phone,
+    people: body.people,
+    /** Same value as `people`; admin list UI (WaitingManager) expects `partySize`. */
+    partySize: body.people,
+  };
   const response = await fetch(waitingSubmitUrl(), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(payload),
     cache: "no-store",
   });
   if (!response.ok) {
