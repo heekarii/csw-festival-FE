@@ -6,8 +6,8 @@ import Link from "next/link";
 import { submitWaiting } from "@/lib/api/waiting";
 
 export default function WaitingForm() {
-  const [contact, setContact] = useState("");
-  const [participantCount, setParticipantCount] = useState("");
+  const [phone, setPhone] = useState("");
+  const [peopleInput, setPeopleInput] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<"idle" | "success" | "failure">("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -17,14 +17,14 @@ export default function WaitingForm() {
     setErrorMessage(null);
     setResult("idle");
 
-    const trimmed = contact.trim();
-    const count = Number.parseInt(participantCount, 10);
+    const trimmed = phone.trim();
+    const people = Number.parseInt(peopleInput, 10);
 
     if (!trimmed) {
       setErrorMessage("연락처를 입력해 주세요.");
       return;
     }
-    if (!Number.isFinite(count) || count < 1) {
+    if (!Number.isFinite(people) || people < 1) {
       setErrorMessage("인원수는 1명 이상의 숫자로 입력해 주세요.");
       return;
     }
@@ -32,13 +32,13 @@ export default function WaitingForm() {
     setSubmitting(true);
     try {
       const ok = await submitWaiting({
-        contact: trimmed,
-        participantCount: count,
+        phone: trimmed,
+        people,
       });
       setResult(ok ? "success" : "failure");
       if (ok) {
-        setContact("");
-        setParticipantCount("");
+        setPhone("");
+        setPeopleInput("");
       }
     } catch {
       setResult("failure");
@@ -70,12 +70,12 @@ export default function WaitingForm() {
           <span className="text-sm font-semibold text-slate-700">연락처</span>
           <input
             type="text"
-            name="contact"
+            name="phone"
             autoComplete="tel"
             inputMode="tel"
             placeholder="전화번호 또는 이메일"
-            value={contact}
-            onChange={(e) => setContact(e.target.value)}
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
             disabled={submitting}
             className="rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-sky-500/30 transition focus:border-sky-600 focus:ring-4 disabled:opacity-60"
             required
@@ -86,12 +86,12 @@ export default function WaitingForm() {
           <span className="text-sm font-semibold text-slate-700">인원수</span>
           <input
             type="number"
-            name="participantCount"
+            name="people"
             min={1}
             step={1}
             placeholder="명"
-            value={participantCount}
-            onChange={(e) => setParticipantCount(e.target.value)}
+            value={peopleInput}
+            onChange={(e) => setPeopleInput(e.target.value)}
             disabled={submitting}
             className="rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-sky-500/30 transition focus:border-sky-600 focus:ring-4 disabled:opacity-60"
             required
