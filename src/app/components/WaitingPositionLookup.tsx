@@ -59,7 +59,7 @@ export default function WaitingPositionLookup() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             disabled={loading}
-            className="rounded-lg border border-slate-300 px-3 py-2.5 text-base outline-none ring-sky-500/30 focus:border-sky-600 focus:ring-4 disabled:opacity-60"
+            className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 outline-none ring-sky-500/30 focus:border-sky-600 focus:ring-4 disabled:opacity-60"
             required
           />
         </label>
