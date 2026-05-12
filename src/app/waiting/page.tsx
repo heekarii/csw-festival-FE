@@ -1,0 +1,15 @@
+import type { Metadata } from "next";
+import WaitingForm from "../components/WaitingForm";
+
+export const metadata: Metadata = {
+  title: "현자카야 웨이팅",
+  description: "현자카야 웨이팅 요청",
+};
+
+export default function WaitingPage() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-sky-100 via-slate-50 to-amber-100 p-6">
+      <WaitingForm />
+    </div>
+  );
+}
