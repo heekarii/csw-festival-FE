@@ -66,3 +66,61 @@ Body (JSON object):
 ## Error responses
 
 Non-2xx HTTP status or JSON that does not indicate success is treated as failure in the UI (no waiting registration).
+---
+
+## Queue position lookup (optional backend)
+
+Customers can check which position they are in the waiting queue (연번).
+
+### API name
+
+`waiting/position` (default path segment; override with `NEXT_PUBLIC_WAITING_POSITION_PATH`)
+
+### Method
+
+`POST`
+
+### URL
+
+`{NEXT_PUBLIC_API_BASE_URL}/{NEXT_PUBLIC_WAITING_POSITION_PATH}`
+
+Example: `https://api.example.com/waiting/position`
+
+### Request body (JSON)
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `phone` | string | Same identifier as used when registering the waiting request. |
+
+### Example
+
+```json
+{
+  "phone": "010-0000-0000"
+}
+```
+
+### Success response
+
+HTTP status: `2xx`
+
+Body must include a positive integer `queueNumber` (1-based waiting order).
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `queueNumber` | number | Current position in the queue (e.g. 5 = fifth in line). |
+| `result` | boolean | Optional; if present and `false`, treat as lookup failure. |
+
+### Example
+
+```json
+{
+  "result": true,
+  "queueNumber": 5
+}
+```
+
+### Client behavior
+
+- On success, the UI shows: "현재 웨이팅 N번째 순서입니다."
+- If `result` is `false` or `queueNumber` is missing/invalid, the UI shows a not-found style message.
