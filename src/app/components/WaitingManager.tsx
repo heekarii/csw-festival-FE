@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export type Waiting = {
   id: number;
@@ -49,6 +49,14 @@ export default function WaitingManager({
     id: number;
     action: LoadingAction;
   } | null>(null);
+
+  useEffect(() => {
+    setWaitingList(initialWaitingList);
+  }, [initialWaitingList]);
+
+  useEffect(() => {
+    setTables(initialTables);
+  }, [initialTables]);
 
   const availableTables = getAvailableTables(tables);
 

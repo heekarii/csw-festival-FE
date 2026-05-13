@@ -18,6 +18,10 @@ export default function TableTimer({ initialTables }: Props) {
   // ① 서버에서 받아온 초기 상태
   const [tables, setTables] = useState<Table[]>(initialTables);
 
+  useEffect(() => {
+    setTables(initialTables);
+  }, [initialTables]);
+
   // ② 실시간 시계
   const [now, setNow] = useState(new Date());
   useEffect(() => {

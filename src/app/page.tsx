@@ -1,4 +1,5 @@
 import Link from "next/link";
+import AutoRefresh from "./components/AutoRefresh";
 import TableTimer, { Table } from "./components/TableTimer";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +20,7 @@ export default async function Page() {
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-8 text-gray-900">
+      <AutoRefresh />
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-3 text-sm">

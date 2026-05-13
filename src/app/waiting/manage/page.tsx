@@ -1,5 +1,6 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
+import AutoRefresh from "../../components/AutoRefresh";
 import WaitingManager, {
   type Waiting,
   type WaitingTable,
@@ -60,6 +61,7 @@ export default async function WaitingManagePage() {
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-8">
+      <AutoRefresh />
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex flex-wrap gap-3 text-sm">
