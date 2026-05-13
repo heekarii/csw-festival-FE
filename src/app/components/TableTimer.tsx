@@ -59,50 +59,62 @@ export default function TableTimer({ initialTables }: Props) {
   };
 
   return (
-    <table className="w-full table-auto border">
-      <thead>
-        <tr className="bg-gray-100">
-          {["테이블", "입장 시간", "경과 시간", "액션"].map((h) => (
-            <th key={h} className="border px-4 py-2">
-              {h}
-            </th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {tables.map((t) => {
-          const entered = !!t.entryTime;
-          const start = entered ? new Date(t.entryTime!) : null;
-          return (
-            <tr key={t.id}>
-              <td className="border px-4 py-2">{t.name}</td>
-              <td className="border px-4 py-2">
-                {entered ? start!.toLocaleTimeString() : "–"}
-              </td>
-              <td className="border px-4 py-2">
-                {entered && start ? formatElapsed(start) : "–"}
-              </td>
-              <td className="border px-4 py-2">
-                {entered ? (
-                  <button
-                    className="px-2 py-1 bg-red-500 text-white rounded"
-                    onClick={() => handleReset(t.id)}
-                  >
-                    리셋
-                  </button>
-                ) : (
-                  <button
-                    className="px-2 py-1 bg-green-500 text-white rounded"
-                    onClick={() => handleEnter(t.id)}
-                  >
-                    입장
-                  </button>
-                )}
-              </td>
+    <section className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+      <div className="border-b px-6 py-4">
+        <h2 className="text-lg font-bold text-gray-900">테이블 목록</h2>
+        <p className="mt-1 text-sm text-gray-500">
+          입장 처리 후 테이블별 이용 시간을 실시간으로 확인할 수 있습니다.
+        </p>
+      </div>
+
+      <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] border-collapse">
+          <thead>
+            <tr className="bg-gray-50 text-left text-sm text-gray-500">
+              <th className="px-6 py-4 font-semibold">테이블</th>
+              <th className="px-6 py-4 font-semibold">입장 시간</th>
+              <th className="px-6 py-4 font-semibold">경과 시간</th>
+              <th className="px-6 py-4 text-center font-semibold">관리</th>
             </tr>
-          );
-        })}
-      </tbody>
-    </table>
+          </thead>
+          <tbody className="divide-y">
+            {tables.map((t) => {
+              const entered = !!t.entryTime;
+              const start = entered ? new Date(t.entryTime!) : null;
+              return (
+                <tr key={t.id} className="transition hover:bg-gray-50">
+                  <td className="px-6 py-4 font-semibold text-gray-900">
+                    {t.name}
+                  </td>
+                  <td className="px-6 py-4 text-gray-700">
+                    {entered ? start!.toLocaleTimeString() : "-"}
+                  </td>
+                  <td className="px-6 py-4 font-mono text-gray-900">
+                    {entered && start ? formatElapsed(start) : "-"}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {entered ? (
+                      <button
+                        className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-red-600 active:scale-95"
+                        onClick={() => handleReset(t.id)}
+                      >
+                        리셋
+                      </button>
+                    ) : (
+                      <button
+                        className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 active:scale-95"
+                        onClick={() => handleEnter(t.id)}
+                      >
+                        입장
+                      </button>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
