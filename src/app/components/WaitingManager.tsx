@@ -14,6 +14,14 @@ type WaitingManagerProps = {
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
+type LoadingAction = "enter" | "delete";
+
+function refreshWaitingNumbers(waitingList: Waiting[]): Waiting[] {
+  return waitingList.map((waiting, index) => ({
+    ...waiting,
+    waitingNumber: index + 1,
+  }));
+}
 
 export default function WaitingManager({
   initialWaitingList,
@@ -21,7 +29,10 @@ export default function WaitingManager({
   const [waitingList, setWaitingList] =
     useState<Waiting[]>(initialWaitingList);
 
-  const [isLoadingId, setIsLoadingId] = useState<number | null>(null);
+  const [loadingAction, setLoadingAction] = useState<{
+    id: number;
+    action: LoadingAction;
+  } | null>(null);
 
   const handleEnter = async (id: number) => {
     const isConfirmed = window.confirm("해당 웨이팅을 입장 처리할까요?");
@@ -34,7 +45,7 @@ export default function WaitingManager({
     }
 
     try {
-      setIsLoadingId(id);
+      setLoadingAction({ id, action: "enter" });
 
       const res = await fetch(`${API_BASE}/waiting/${id}/enter`, {
         method: "POST",
@@ -45,18 +56,45 @@ export default function WaitingManager({
       }
 
       setWaitingList((prev) =>
-        prev
-          .filter((waiting) => waiting.id !== id)
-          .map((waiting, index) => ({
-            ...waiting,
-            waitingNumber: index + 1,
-          }))
+        refreshWaitingNumbers(prev.filter((waiting) => waiting.id !== id))
       );
     } catch (error) {
       console.error(error);
       alert("입장 처리 중 오류가 발생했습니다.");
     } finally {
-      setIsLoadingId(null);
+      setLoadingAction(null);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const isConfirmed = window.confirm("해당 웨이팅을 삭제할까요?");
+
+    if (!isConfirmed) return;
+
+    if (!API_BASE) {
+      alert("API 주소가 설정되지 않았습니다.");
+      return;
+    }
+
+    try {
+      setLoadingAction({ id, action: "delete" });
+
+      const res = await fetch(`${API_BASE}/waiting/${id}/delete`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error("삭제에 실패했습니다.");
+      }
+
+      setWaitingList((prev) =>
+        refreshWaitingNumbers(prev.filter((waiting) => waiting.id !== id))
+      );
+    } catch (error) {
+      console.error(error);
+      alert("삭제 처리 중 오류가 발생했습니다.");
+    } finally {
+      setLoadingAction(null);
     }
   };
 
@@ -76,12 +114,12 @@ export default function WaitingManager({
         <div className="border-b px-6 py-4">
           <h2 className="text-lg font-bold text-gray-900">웨이팅 목록</h2>
           <p className="mt-1 text-sm text-gray-500">
-            입장 완료된 웨이팅은 목록에서 제거됩니다.
+            입장 처리 또는 삭제된 웨이팅은 목록에서 제거됩니다.
           </p>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[600px] border-collapse">
+          <table className="w-full min-w-[680px] border-collapse">
             <thead>
               <tr className="bg-gray-50 text-left text-sm text-gray-500">
                 <th className="px-6 py-4 font-semibold">대기번호</th>
@@ -109,36 +147,57 @@ export default function WaitingManager({
                   </td>
                 </tr>
               ) : (
-                waitingList.map((waiting) => (
-                  <tr key={waiting.id} className="transition hover:bg-gray-50">
-                    <td className="px-6 py-4 font-semibold text-gray-900">
-                      {waiting.waitingNumber}번
-                    </td>
+                waitingList.map((waiting) => {
+                  const isEntering =
+                    loadingAction?.id === waiting.id &&
+                    loadingAction.action === "enter";
+                  const isDeleting =
+                    loadingAction?.id === waiting.id &&
+                    loadingAction.action === "delete";
+                  const isCurrentRowLoading =
+                    loadingAction?.id === waiting.id;
 
-                    <td className="px-6 py-4 text-gray-700">
-                      {waiting.phone}
-                    </td>
+                  return (
+                    <tr
+                      key={waiting.id}
+                      className="transition hover:bg-gray-50"
+                    >
+                      <td className="px-6 py-4 font-semibold text-gray-900">
+                        {waiting.waitingNumber}번
+                      </td>
 
-                    <td className="px-6 py-4">
-                      <span className="font-semibold text-gray-900">
-                        {waiting.partySize}
-                      </span>
-                      <span className="ml-1 text-gray-500">명</span>
-                    </td>
+                      <td className="px-6 py-4 text-gray-700">
+                        {waiting.phone}
+                      </td>
 
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleEnter(waiting.id)}
-                        disabled={isLoadingId === waiting.id}
-                        className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-gray-400"
-                      >
-                        {isLoadingId === waiting.id
-                          ? "처리 중..."
-                          : "입장 처리"}
-                      </button>
-                    </td>
-                  </tr>
-                ))
+                      <td className="px-6 py-4">
+                        <span className="font-semibold text-gray-900">
+                          {waiting.partySize}
+                        </span>
+                        <span className="ml-1 text-gray-500">명</span>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleEnter(waiting.id)}
+                            disabled={isCurrentRowLoading}
+                            className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-gray-400"
+                          >
+                            {isEntering ? "처리 중..." : "입장 처리"}
+                          </button>
+                          <button
+                            onClick={() => handleDelete(waiting.id)}
+                            disabled={isCurrentRowLoading}
+                            className="rounded-xl border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-50 active:scale-95 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+                          >
+                            {isDeleting ? "삭제 중..." : "삭제"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
