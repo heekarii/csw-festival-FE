@@ -136,10 +136,41 @@ Body must include a positive integer `queueNumber` (1-based waiting order).
 |------|------------------|-------------|
 | Customer waiting submit | `feature/waiting-pr` → `POST …/waiting` | Body includes `phone`, `people`, and `partySize` (duplicate) so the same backend can populate admin lists. |
 | Admin waiting list | `feature/add-reservation-management` → `GET …/waiting` | JSON array items use `id`, `phone`, `partySize`, and display `waitingNumber` (derived in UI). |
-| Admin enter | same branch → `POST …/waiting/:id/enter` | Unrelated to customer submit; no change here. |
+| Admin enter | same branch → `POST …/tables/:tableId/enter`, then `POST …/waiting/:id/enter` | Admin selects an empty table before entering a waiting party. |
 | Admin delete | same branch → `POST …/wating/:id/delete` | Deletes one waiting row without marking it as entered. The `wating` path segment is kept as requested by the current backend contract. |
 | Reservations admin | `GET …/reservations` | Uses `phoneNumber`, `peopleCount`, `visitTime` — **different resource** from waiting; customer waiting flow does not send `visitTime`. Align only if the product merges those APIs. |
 | Tables (seats) | `GET …/tables` | Independent of waiting customer payload. |
+
+---
+
+## Admin waiting enter with table assignment
+
+Moves a waiting party into a selected table and removes that party from the waiting queue.
+
+### Required table list
+
+The admin page calls `GET {NEXT_PUBLIC_API_BASE_URL}/tables` and expects this shape:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | number | Table ID used in the table enter URL. |
+| `name` | string | Display name shown in the table selector. |
+| `entryTime` | string \| null | `null` means the table is currently available. |
+
+### Client flow
+
+1. The admin selects an available table from the waiting row.
+2. The client calls `POST {NEXT_PUBLIC_API_BASE_URL}/tables/{table_id}/enter`.
+3. If the table enter call succeeds, the client calls `POST {NEXT_PUBLIC_API_BASE_URL}/waiting/{id}/enter`.
+4. If both calls succeed, the waiting row is removed from the local list and waiting numbers are recalculated.
+
+### Request body
+
+No body is required for either call. The table assignment is represented by the `{table_id}` path parameter.
+
+### Error behavior
+
+If either request returns a non-2xx HTTP status, the UI shows an error and keeps the waiting row visible.
 
 ---
 

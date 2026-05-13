@@ -1,6 +1,9 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
-import WaitingManager, { Waiting } from "../../components/WaitingManager";
+import WaitingManager, {
+  type Waiting,
+  type WaitingTable,
+} from "../../components/WaitingManager";
 
 export const metadata: Metadata = {
   title: "웨이팅 목록 관리 페이지",
@@ -33,8 +36,27 @@ async function fetchWaitingList(): Promise<Waiting[]> {
   }));
 }
 
+async function fetchTables(): Promise<WaitingTable[]> {
+  if (!API_BASE) {
+    throw new Error("NEXT_PUBLIC_API_BASE_URL이 설정되지 않았습니다.");
+  }
+
+  const res = await fetch(`${API_BASE}/tables`, {
+    cache: "no-store",
+  });
+
+  if (!res.ok) {
+    throw new Error("테이블 목록을 불러오지 못했습니다.");
+  }
+
+  return res.json();
+}
+
 export default async function WaitingManagePage() {
-  const initialWaitingList = await fetchWaitingList();
+  const [initialWaitingList, initialTables] = await Promise.all([
+    fetchWaitingList(),
+    fetchTables(),
+  ]);
 
   return (
     <main className="min-h-screen bg-gray-50 px-6 py-8">
@@ -69,7 +91,10 @@ export default async function WaitingManagePage() {
           </p>
         </div>
 
-        <WaitingManager initialWaitingList={initialWaitingList} />
+        <WaitingManager
+          initialWaitingList={initialWaitingList}
+          initialTables={initialTables}
+        />
       </div>
     </main>
   );

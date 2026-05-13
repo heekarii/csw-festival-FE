@@ -9,8 +9,15 @@ export type Waiting = {
   partySize: number;
 };
 
+export type WaitingTable = {
+  id: number;
+  name: string;
+  entryTime: string | null;
+};
+
 type WaitingManagerProps = {
   initialWaitingList: Waiting[];
+  initialTables: WaitingTable[];
 };
 
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
@@ -23,19 +30,40 @@ function refreshWaitingNumbers(waitingList: Waiting[]): Waiting[] {
   }));
 }
 
+function getAvailableTables(tables: WaitingTable[]): WaitingTable[] {
+  return tables.filter((table) => !table.entryTime);
+}
+
 export default function WaitingManager({
   initialWaitingList,
+  initialTables,
 }: WaitingManagerProps) {
   const [waitingList, setWaitingList] =
     useState<Waiting[]>(initialWaitingList);
+  const [tables, setTables] = useState<WaitingTable[]>(initialTables);
+  const [selectedTableIds, setSelectedTableIds] = useState<
+    Record<number, string>
+  >({});
 
   const [loadingAction, setLoadingAction] = useState<{
     id: number;
     action: LoadingAction;
   } | null>(null);
 
+  const availableTables = getAvailableTables(tables);
+
   const handleEnter = async (id: number) => {
-    const isConfirmed = window.confirm("해당 웨이팅을 입장 처리할까요?");
+    const selectedTableId = Number(selectedTableIds[id]);
+    const selectedTable = tables.find((table) => table.id === selectedTableId);
+
+    if (!selectedTable || selectedTable.entryTime) {
+      alert("배치할 빈 테이블을 선택해 주세요.");
+      return;
+    }
+
+    const isConfirmed = window.confirm(
+      `${selectedTable.name}에 배치하고 해당 웨이팅을 입장 처리할까요?`
+    );
 
     if (!isConfirmed) return;
 
@@ -47,17 +75,37 @@ export default function WaitingManager({
     try {
       setLoadingAction({ id, action: "enter" });
 
-      const res = await fetch(`${API_BASE}/waiting/${id}/enter`, {
+      const tableRes = await fetch(`${API_BASE}/tables/${selectedTableId}/enter`, {
         method: "POST",
       });
 
-      if (!res.ok) {
+      if (!tableRes.ok) {
+        throw new Error("테이블 입장 처리에 실패했습니다.");
+      }
+
+      const waitingRes = await fetch(`${API_BASE}/waiting/${id}/enter`, {
+        method: "POST",
+      });
+
+      if (!waitingRes.ok) {
         throw new Error("입장 처리에 실패했습니다.");
       }
 
+      setTables((prev) =>
+        prev.map((table) =>
+          table.id === selectedTableId
+            ? { ...table, entryTime: new Date().toISOString() }
+            : table
+        )
+      );
       setWaitingList((prev) =>
         refreshWaitingNumbers(prev.filter((waiting) => waiting.id !== id))
       );
+      setSelectedTableIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     } catch (error) {
       console.error(error);
       alert("입장 처리 중 오류가 발생했습니다.");
@@ -79,7 +127,7 @@ export default function WaitingManager({
     try {
       setLoadingAction({ id, action: "delete" });
 
-      const res = await fetch(`${API_BASE}/waiting/${id}/delete`, {
+      const res = await fetch(`${API_BASE}/wating/${id}/delete`, {
         method: "POST",
       });
 
@@ -90,6 +138,11 @@ export default function WaitingManager({
       setWaitingList((prev) =>
         refreshWaitingNumbers(prev.filter((waiting) => waiting.id !== id))
       );
+      setSelectedTableIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
     } catch (error) {
       console.error(error);
       alert("삭제 처리 중 오류가 발생했습니다.");
@@ -114,17 +167,18 @@ export default function WaitingManager({
         <div className="border-b px-6 py-4">
           <h2 className="text-lg font-bold text-gray-900">웨이팅 목록</h2>
           <p className="mt-1 text-sm text-gray-500">
-            입장 처리 또는 삭제된 웨이팅은 목록에서 제거됩니다.
+            빈 테이블을 선택한 뒤 입장 처리하면 테이블 이용 시간이 시작됩니다.
           </p>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[680px] border-collapse">
+          <table className="w-full min-w-[820px] border-collapse">
             <thead>
               <tr className="bg-gray-50 text-left text-sm text-gray-500">
                 <th className="px-6 py-4 font-semibold">대기번호</th>
                 <th className="px-6 py-4 font-semibold">연락처</th>
                 <th className="px-6 py-4 font-semibold">인원 수</th>
+                <th className="px-6 py-4 font-semibold">배치 테이블</th>
                 <th className="px-6 py-4 text-center font-semibold">관리</th>
               </tr>
             </thead>
@@ -132,7 +186,7 @@ export default function WaitingManager({
             <tbody className="divide-y">
               {waitingList.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-16 text-center">
+                  <td colSpan={5} className="px-6 py-16 text-center">
                     <div className="mx-auto flex max-w-sm flex-col items-center">
                       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-2xl">
                         ✓
@@ -178,10 +232,40 @@ export default function WaitingManager({
                       </td>
 
                       <td className="px-6 py-4">
+                        <select
+                          value={selectedTableIds[waiting.id] ?? ""}
+                          onChange={(event) =>
+                            setSelectedTableIds((prev) => ({
+                              ...prev,
+                              [waiting.id]: event.target.value,
+                            }))
+                          }
+                          disabled={
+                            isCurrentRowLoading || availableTables.length === 0
+                          }
+                          className="w-full min-w-32 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+                        >
+                          <option value="">
+                            {availableTables.length === 0
+                              ? "빈 테이블 없음"
+                              : "테이블 선택"}
+                          </option>
+                          {availableTables.map((table) => (
+                            <option key={table.id} value={table.id}>
+                              {table.name}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+
+                      <td className="px-6 py-4">
                         <div className="flex justify-center gap-2">
                           <button
                             onClick={() => handleEnter(waiting.id)}
-                            disabled={isCurrentRowLoading}
+                            disabled={
+                              isCurrentRowLoading ||
+                              !selectedTableIds[waiting.id]
+                            }
                             className="rounded-xl bg-gray-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-gray-400"
                           >
                             {isEntering ? "처리 중..." : "입장 처리"}
