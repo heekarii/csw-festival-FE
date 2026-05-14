@@ -60,11 +60,11 @@ export default async function WaitingManagePage() {
   ]);
 
   return (
-    <main className="min-h-screen bg-gray-50 px-6 py-8">
+    <main className="min-h-screen bg-gray-50 px-4 py-5 sm:px-6 sm:py-8">
       <AutoRefresh />
       <div className="mx-auto max-w-6xl">
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap gap-3 text-sm">
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 sm:mb-6 sm:gap-4">
+          <div className="flex flex-wrap gap-2 text-sm sm:gap-3">
             <Link
               href="/"
               className="font-medium text-blue-600 hover:underline"
@@ -81,14 +81,14 @@ export default async function WaitingManagePage() {
           </div>
         </div>
 
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <p className="text-sm font-semibold text-blue-600">현자카야</p>
 
-          <h1 className="mt-2 text-3xl font-bold text-gray-900">
+          <h1 className="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">
             웨이팅 목록 관리
           </h1>
 
-          <p className="mt-2 text-gray-500">
+          <p className="mt-2 text-sm leading-6 text-gray-500 sm:text-base">
             축제 주점의 웨이팅 예약자를 확인하고 입장 처리를 할 수 있습니다.
           </p>
         </div>

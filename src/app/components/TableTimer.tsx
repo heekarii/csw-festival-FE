@@ -101,14 +101,68 @@ export default function TableTimer({ initialTables }: Props) {
 
   return (
     <section className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-      <div className="border-b px-6 py-4">
+      <div className="border-b px-4 py-4 sm:px-6">
         <h2 className="text-lg font-bold text-gray-900">테이블 목록</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm leading-6 text-gray-500">
           입장 처리 후 테이블별 이용 시간을 실시간으로 확인할 수 있습니다.
         </p>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="divide-y md:hidden">
+        {tables.map((t) => {
+          const entered = !!t.entryTime;
+          const start = entered ? new Date(t.entryTime!) : null;
+
+          return (
+            <div key={t.id} className="space-y-4 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-base font-semibold text-gray-900">
+                    {t.name}
+                  </p>
+                  <p className="mt-1 text-sm text-gray-500">
+                    {entered ? start!.toLocaleTimeString() : "-"}
+                  </p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                    entered
+                      ? "bg-blue-50 text-blue-700"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
+                  {entered ? "이용 중" : "빈 테이블"}
+                </span>
+              </div>
+
+              <div className="rounded-xl bg-gray-50 px-4 py-3">
+                <p className="text-xs font-semibold text-gray-500">경과 시간</p>
+                <p className="mt-1 font-mono text-2xl font-bold text-gray-900">
+                  {entered && start ? formatElapsed(start) : "-:-:-"}
+                </p>
+              </div>
+
+              {entered ? (
+                <button
+                  className="w-full rounded-xl bg-red-500 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-red-600 active:scale-95"
+                  onClick={() => handleReset(t.id)}
+                >
+                  리셋
+                </button>
+              ) : (
+                <button
+                  className="w-full rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 active:scale-95"
+                  onClick={() => handleEnter(t.id)}
+                >
+                  입장
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="hidden overflow-x-auto md:block">
         <table className="w-full min-w-[640px] border-collapse">
           <thead>
             <tr className="bg-gray-50 text-left text-sm text-gray-500">

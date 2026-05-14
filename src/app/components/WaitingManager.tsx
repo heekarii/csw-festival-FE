@@ -175,7 +175,7 @@ export default function WaitingManager({
   return (
     <section className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
+        <div className="rounded-2xl border bg-white p-4 shadow-sm sm:p-5">
           <p className="text-sm text-gray-500">현재 대기 팀</p>
           <p className="mt-2 text-3xl font-bold text-gray-900">
             {waitingList.length}
@@ -185,14 +185,102 @@ export default function WaitingManager({
       </div>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-        <div className="border-b px-6 py-4">
+        <div className="border-b px-4 py-4 sm:px-6">
           <h2 className="text-lg font-bold text-gray-900">웨이팅 목록</h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm leading-6 text-gray-500">
             빈 테이블을 선택한 뒤 입장 처리하면 테이블 이용 시간이 시작됩니다.
           </p>
         </div>
 
-        <div className="overflow-x-auto">
+        <div className="divide-y md:hidden">
+          {waitingList.length === 0 ? (
+            <div className="px-4 py-12 text-center">
+              <div className="mx-auto flex max-w-sm flex-col items-center">
+                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-gray-100 text-2xl">
+                  ??
+                </div>
+                <p className="text-lg font-semibold text-gray-800">
+                  현재 대기 중인 웨이팅이 없습니다.
+                </p>
+                <p className="mt-2 text-sm leading-6 text-gray-500">
+                  새로운 웨이팅이 등록되면 여기에 표시됩니다.
+                </p>
+              </div>
+            </div>
+          ) : (
+            waitingList.map((waiting) => {
+              const isEntering =
+                loadingAction?.id === waiting.id &&
+                loadingAction.action === "enter";
+              const isDeleting =
+                loadingAction?.id === waiting.id &&
+                loadingAction.action === "delete";
+              const isCurrentRowLoading = loadingAction?.id === waiting.id;
+
+              return (
+                <div key={waiting.id} className="space-y-4 p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-base font-semibold text-gray-900">
+                        {waiting.waitingNumber}번
+                      </p>
+                      <p className="mt-1 break-all text-sm text-gray-600">
+                        {waiting.phone}
+                      </p>
+                    </div>
+                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                      {waiting.partySize}명
+                    </span>
+                  </div>
+
+                  <select
+                    value={selectedTableIds[waiting.id] ?? ""}
+                    onChange={(event) =>
+                      setSelectedTableIds((prev) => ({
+                        ...prev,
+                        [waiting.id]: event.target.value,
+                      }))
+                    }
+                    disabled={isCurrentRowLoading || availableTables.length === 0}
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-gray-900 shadow-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+                  >
+                    <option value="">
+                      {availableTables.length === 0
+                        ? "빈 테이블 없음"
+                        : "테이블 선택"}
+                    </option>
+                    {availableTables.map((table) => (
+                      <option key={table.id} value={table.id}>
+                        {table.name}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      onClick={() => handleEnter(waiting.id)}
+                      disabled={
+                        isCurrentRowLoading || !selectedTableIds[waiting.id]
+                      }
+                      className="rounded-xl bg-gray-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-gray-700 active:scale-95 disabled:cursor-not-allowed disabled:bg-gray-400"
+                    >
+                      {isEntering ? "처리 중..." : "입장 처리"}
+                    </button>
+                    <button
+                      onClick={() => handleDelete(waiting.id)}
+                      disabled={isCurrentRowLoading}
+                      className="rounded-xl border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 shadow-sm transition hover:bg-red-50 active:scale-95 disabled:cursor-not-allowed disabled:border-gray-200 disabled:text-gray-400"
+                    >
+                      {isDeleting ? "삭제 중..." : "삭제"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+
+        <div className="hidden overflow-x-auto md:block">
           <table className="w-full min-w-[820px] border-collapse">
             <thead>
               <tr className="bg-gray-50 text-left text-sm text-gray-500">
