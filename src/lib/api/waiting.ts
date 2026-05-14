@@ -8,6 +8,12 @@ export type WaitingRequestBody = {
 
 export type WaitingResponseBody = {
   result: boolean;
+  message?: string;
+};
+
+export type WaitingSubmitResult = {
+  ok: boolean;
+  message?: string;
 };
 
 const DEFAULT_PATH = "waiting";
@@ -24,9 +30,9 @@ function waitingSubmitUrl(): string {
   return `${base}/${path}`;
 }
 
-function parseWaitingSuccess(data: unknown): boolean {
+function parseWaitingResult(data: unknown): WaitingSubmitResult {
   if (data === true) {
-    return true;
+    return { ok: true };
   }
   if (
     typeof data === "object" &&
@@ -34,18 +40,22 @@ function parseWaitingSuccess(data: unknown): boolean {
     "result" in data &&
     typeof (data as WaitingResponseBody).result === "boolean"
   ) {
-    return (data as WaitingResponseBody).result;
+    const body = data as WaitingResponseBody;
+    return {
+      ok: body.result,
+      message: typeof body.message === "string" ? body.message : undefined,
+    };
   }
-  return false;
+  return { ok: false };
 }
 
 /**
  * POST waiting registration.
- * Prefer JSON body `{ "result": boolean }`; raw boolean `true` is accepted for backward compatibility.
+ * Prefer JSON body `{ "result": boolean, "message"?: string }`; raw boolean `true` is accepted for backward compatibility.
  */
 export async function submitWaiting(
   body: WaitingRequestBody,
-): Promise<boolean> {
+): Promise<WaitingSubmitResult> {
   const payload = {
     phone: body.phone,
     people: body.people,
@@ -59,8 +69,8 @@ export async function submitWaiting(
     cache: "no-store",
   });
   if (!response.ok) {
-    return false;
+    return { ok: false };
   }
   const data: unknown = await response.json();
-  return parseWaitingSuccess(data);
+  return parseWaitingResult(data);
 }

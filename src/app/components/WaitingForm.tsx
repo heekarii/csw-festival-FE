@@ -30,14 +30,16 @@ export default function WaitingForm() {
 
     setSubmitting(true);
     try {
-      const ok = await submitWaiting({
+      const submitResult = await submitWaiting({
         phone: trimmed,
         people,
       });
-      setResult(ok ? "success" : "failure");
-      if (ok) {
+      setResult(submitResult.ok ? "success" : "failure");
+      if (submitResult.ok) {
         setPhone("");
         setPeopleInput("");
+      } else if (submitResult.message) {
+        setErrorMessage(submitResult.message);
       }
     } catch {
       setResult("failure");

@@ -51,6 +51,7 @@ Body (JSON object):
 | Field | Type | Description |
 |-------|------|-------------|
 | `result` | boolean | `true` when the waiting request is accepted; `false` otherwise. |
+| `message` | string | Optional failure message. When present with `result: false`, the client displays this message in the waiting form. |
 
 ### Example
 
@@ -68,6 +69,15 @@ Body (JSON object):
 ## Error responses
 
 Non-2xx HTTP status or JSON that does not indicate success is treated as failure in the UI (no waiting registration).
+
+If the server returns a duplicate-phone failure, the client displays the server-provided message:
+
+```json
+{
+  "result": false,
+  "message": "이미 예약 등록한 전화번호입니다."
+}
+```
 ---
 
 ## Queue position lookup (optional backend)
