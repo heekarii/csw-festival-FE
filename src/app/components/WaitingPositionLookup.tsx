@@ -55,7 +55,7 @@ export default function WaitingPositionLookup() {
             name="lookupPhone"
             autoComplete="tel"
             inputMode="tel"
-            placeholder="접수에 사용한 번호"
+            placeholder="010-1234-1234"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             disabled={loading}

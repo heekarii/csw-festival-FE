@@ -50,19 +50,11 @@ export default function WaitingForm() {
 
   return (
     <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
-      <div className="mb-4 flex justify-end">
-        <Link
-          href="/"
-          className="text-sm font-medium text-sky-700 underline-offset-2 hover:underline"
-        >
-          테이블 입장 관리
-        </Link>
-      </div>
       <h1 className="mb-2 text-2xl font-bold tracking-tight text-slate-900">
         현자카야 웨이팅
       </h1>
       <p className="mb-6 text-sm text-slate-600">
-        연락처와 인원을 입력해 웨이팅을 요청합니다.
+        연락처와 인원을 입력해 웨이팅을 접수합니다.
       </p>
 
       <form className="flex flex-col gap-4" onSubmit={handleSubmit} noValidate>
@@ -73,7 +65,7 @@ export default function WaitingForm() {
             name="phone"
             autoComplete="tel"
             inputMode="tel"
-            placeholder="전화번호 또는 이메일"
+            placeholder="010-1234-1234"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             disabled={submitting}
@@ -106,7 +98,7 @@ export default function WaitingForm() {
 
         {result === "success" ? (
           <p className="text-sm text-emerald-700" role="status">
-            웨이팅 요청이 접수되었습니다.
+            웨이팅이 접수되었습니다.
           </p>
         ) : null}
 
@@ -121,7 +113,7 @@ export default function WaitingForm() {
           disabled={submitting}
           className="mt-1 rounded-lg bg-sky-600 py-3 text-base font-semibold text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {submitting ? "전송 중…" : "웨이팅 요청"}
+          {submitting ? "전송 중…" : "웨이팅 접수"}
         </button>
       </form>
     </div>

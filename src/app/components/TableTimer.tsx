@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export type Table = {
   id: number;
@@ -15,6 +16,7 @@ type Props = {
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function TableTimer({ initialTables }: Props) {
+  const router = useRouter();
   // ① 서버에서 받아온 초기 상태
   const [tables, setTables] = useState<Table[]>(initialTables);
 
@@ -31,25 +33,60 @@ export default function TableTimer({ initialTables }: Props) {
 
   // ③ API 호출 후 상태 업데이트
   const handleEnter = async (id: number) => {
-    await fetch(`${API_BASE}/tables/${id}/enter`, {
-      method: "POST",
-    });
+    if (!API_BASE) return;
+
+    const previousTables = tables;
+    const optimisticEntryTime = new Date().toISOString();
+
     setTables((prev) =>
       prev.map((t) =>
         t.id === id
-          ? { ...t, entryTime: new Date().toISOString() }
+          ? { ...t, entryTime: optimisticEntryTime }
           : t
       )
     );
+
+    try {
+      const res = await fetch(`${API_BASE}/tables/${id}/enter`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to enter table.");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setTables(previousTables);
+      router.refresh();
+    }
   };
 
   const handleReset = async (id: number) => {
-    await fetch(`${API_BASE}/tables/${id}/reset`, {
-      method: "POST",
-    });
+    if (!API_BASE) return;
+
+    const previousTables = tables;
+
     setTables((prev) =>
       prev.map((t) => (t.id === id ? { ...t, entryTime: null } : t))
     );
+
+    try {
+      const res = await fetch(`${API_BASE}/tables/${id}/reset`, {
+        method: "POST",
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to reset table.");
+      }
+
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+      setTables(previousTables);
+      router.refresh();
+    }
   };
 
   const formatElapsed = (start: Date) => {

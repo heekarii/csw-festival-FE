@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export type Waiting = {
   id: number;
@@ -38,6 +39,7 @@ export default function WaitingManager({
   initialWaitingList,
   initialTables,
 }: WaitingManagerProps) {
+  const router = useRouter();
   const [waitingList, setWaitingList] =
     useState<Waiting[]>(initialWaitingList);
   const [tables, setTables] = useState<WaitingTable[]>(initialTables);
@@ -80,8 +82,29 @@ export default function WaitingManager({
       return;
     }
 
+    const previousWaitingList = waitingList;
+    const previousTables = tables;
+    const previousSelectedTableIds = selectedTableIds;
+
     try {
       setLoadingAction({ id, action: "enter" });
+      const optimisticEntryTime = new Date().toISOString();
+
+      setTables((prev) =>
+        prev.map((table) =>
+          table.id === selectedTableId
+            ? { ...table, entryTime: optimisticEntryTime }
+            : table
+        )
+      );
+      setWaitingList((prev) =>
+        refreshWaitingNumbers(prev.filter((waiting) => waiting.id !== id))
+      );
+      setSelectedTableIds((prev) => {
+        const next = { ...prev };
+        delete next[id];
+        return next;
+      });
 
       const tableRes = await fetch(`${API_BASE}/tables/${selectedTableId}/enter`, {
         method: "POST",
@@ -99,23 +122,13 @@ export default function WaitingManager({
         throw new Error("입장 처리에 실패했습니다.");
       }
 
-      setTables((prev) =>
-        prev.map((table) =>
-          table.id === selectedTableId
-            ? { ...table, entryTime: new Date().toISOString() }
-            : table
-        )
-      );
-      setWaitingList((prev) =>
-        refreshWaitingNumbers(prev.filter((waiting) => waiting.id !== id))
-      );
-      setSelectedTableIds((prev) => {
-        const next = { ...prev };
-        delete next[id];
-        return next;
-      });
+      router.refresh();
     } catch (error) {
       console.error(error);
+      setWaitingList(previousWaitingList);
+      setTables(previousTables);
+      setSelectedTableIds(previousSelectedTableIds);
+      router.refresh();
       alert("입장 처리 중 오류가 발생했습니다.");
     } finally {
       setLoadingAction(null);
