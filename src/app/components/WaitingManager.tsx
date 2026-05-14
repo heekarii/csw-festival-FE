@@ -148,7 +148,7 @@ export default function WaitingManager({
     try {
       setLoadingAction({ id, action: "delete" });
 
-      const res = await fetch(`${API_BASE}/wating/${id}/delete`, {
+      const res = await fetch(`${API_BASE}/waiting/${id}/delete`, {
         method: "POST",
       });
 
