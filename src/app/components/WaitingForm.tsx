@@ -2,7 +2,6 @@
 
 import type { FormEvent } from "react";
 import { useState } from "react";
-import Link from "next/link";
 import { submitWaiting } from "@/lib/api/waiting";
 
 export default function WaitingForm() {
