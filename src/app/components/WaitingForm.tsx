@@ -4,6 +4,12 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { submitWaiting } from "@/lib/api/waiting";
 
+const PHONE_LENGTH = 11;
+
+function toPhoneDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, PHONE_LENGTH);
+}
+
 export default function WaitingForm() {
   const [phone, setPhone] = useState("");
   const [peopleInput, setPeopleInput] = useState("");
@@ -16,11 +22,15 @@ export default function WaitingForm() {
     setErrorMessage(null);
     setResult("idle");
 
-    const trimmed = phone.trim();
+    const phoneDigits = toPhoneDigits(phone);
     const people = Number.parseInt(peopleInput, 10);
 
-    if (!trimmed) {
+    if (!phoneDigits) {
       setErrorMessage("연락처를 입력해 주세요.");
+      return;
+    }
+    if (phoneDigits.length !== PHONE_LENGTH) {
+      setErrorMessage("연락처는 숫자 11자리로 입력해 주세요.");
       return;
     }
     if (!Number.isFinite(people) || people < 1) {
@@ -31,7 +41,7 @@ export default function WaitingForm() {
     setSubmitting(true);
     try {
       const submitResult = await submitWaiting({
-        phone: trimmed,
+        phone: phoneDigits,
         people,
       });
       setResult(submitResult.ok ? "success" : "failure");
@@ -65,10 +75,12 @@ export default function WaitingForm() {
             type="text"
             name="phone"
             autoComplete="tel"
-            inputMode="tel"
-            placeholder="010-1234-1234"
+            inputMode="numeric"
+            maxLength={PHONE_LENGTH}
+            pattern="[0-9]{11}"
+            placeholder="01012341234"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(toPhoneDigits(e.target.value))}
             disabled={submitting}
             className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 outline-none ring-sky-500/30 transition focus:border-sky-600 focus:ring-4 disabled:opacity-60"
             required

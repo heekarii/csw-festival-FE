@@ -4,6 +4,12 @@ import type { FormEvent } from "react";
 import { useState } from "react";
 import { fetchWaitingQueuePosition } from "@/lib/api/waitingPosition";
 
+const PHONE_LENGTH = 11;
+
+function toPhoneDigits(value: string) {
+  return value.replace(/\D/g, "").slice(0, PHONE_LENGTH);
+}
+
 export default function WaitingPositionLookup() {
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,15 +21,19 @@ export default function WaitingPositionLookup() {
     setErrorMessage(null);
     setQueueNumber(null);
 
-    const trimmed = phone.trim();
-    if (!trimmed) {
+    const phoneDigits = toPhoneDigits(phone);
+    if (!phoneDigits) {
       setErrorMessage("연락처를 입력해 주세요.");
+      return;
+    }
+    if (phoneDigits.length !== PHONE_LENGTH) {
+      setErrorMessage("연락처는 숫자 11자리로 입력해 주세요.");
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetchWaitingQueuePosition(trimmed);
+      const res = await fetchWaitingQueuePosition(phoneDigits);
       if (res.ok) {
         setQueueNumber(res.queueNumber);
       } else {
@@ -54,10 +64,12 @@ export default function WaitingPositionLookup() {
             type="text"
             name="lookupPhone"
             autoComplete="tel"
-            inputMode="tel"
-            placeholder="010-1234-1234"
+            inputMode="numeric"
+            maxLength={PHONE_LENGTH}
+            pattern="[0-9]{11}"
+            placeholder="01012341234"
             value={phone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={(e) => setPhone(toPhoneDigits(e.target.value))}
             disabled={loading}
             className="rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-base text-slate-900 placeholder:text-slate-400 outline-none ring-sky-500/30 focus:border-sky-600 focus:ring-4 disabled:opacity-60"
             required

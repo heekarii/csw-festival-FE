@@ -28,7 +28,7 @@ Example: `https://api.example.com/waiting`
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `phone` | string | Customer contact (e.g. mobile in `010-0000-0000` format; free-form string is allowed if the UI collects email as well). |
+| `phone` | string | Customer contact, sent as exactly 11 digits without hyphens (e.g. `01000000000`). |
 | `people` | number | Party size (integer, minimum 1). |
 | `partySize` | number | **Sent by this client with the same value as `people`.** Matches the `partySize` field used in the admin waiting list (`WaitingManager` on `feature/add-reservation-management`). |
 
@@ -36,7 +36,7 @@ Example: `https://api.example.com/waiting`
 
 ```json
 {
-  "phone": "010-0000-0000",
+  "phone": "01000000000",
   "people": 4,
   "partySize": 4
 }
@@ -102,13 +102,13 @@ Example: `https://api.example.com/waiting/position`
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `phone` | string | Same identifier as used when registering the waiting request. |
+| `phone` | string | Same 11-digit identifier as used when registering the waiting request. |
 
 ### Example
 
 ```json
 {
-  "phone": "010-0000-0000"
+  "phone": "01000000000"
 }
 ```
 
